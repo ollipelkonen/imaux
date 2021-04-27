@@ -66,11 +66,18 @@ public:
         for( int j=0; j<this->size; j ++ )
           v += this->nodes.at(j)->connections.at(i)->value;
         auto const & node = this->next->nodes.at(i);
-        node->value = v;
+        //node->value = v;
+        //TODO: here or in node?
+        node->value = sigmoid(v);
       }
       next->calc();
     }
+  }
 
+
+  T sigmoid(T z)
+  {
+    return 1.0 / (1.0 + exp(-z));
   }
 
   Layer<T>* getLast()
@@ -78,6 +85,13 @@ public:
     if ( next != NULL )
       return next->getLast();
     return this;
+  }
+
+  void debugPrint()
+  {
+    std::cout << "value: " << nodes.at(0)->value << "\n";
+    if ( next != NULL )
+      next->debugPrint();
   }
 
   auto addChild( int size )

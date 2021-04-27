@@ -65,9 +65,11 @@ public:
 
   T calc()
   {
+    //TODO: according to this, sigmoid is calculated AFTER adds http://neuralnetworksanddeeplearning.com/chap2.html
     for (auto const& v: this->connections)
     {
-      v->value += sigmoid(value * v->weight + v->bias);
+      //v->value += sigmoid(value * v->weight + v->bias);
+      v->value += value * v->weight + v->bias;
     }
   }
 };

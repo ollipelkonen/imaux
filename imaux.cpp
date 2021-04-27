@@ -42,9 +42,9 @@ int main()
   }
   while ( size < 64 );
   n = n->addChild( size*size );
+  /*n = n->addChild( size*size );
   n = n->addChild( size*size );
-  n = n->addChild( size*size );
-  n = n->addChild( size*size );
+  n = n->addChild( size*size );*/
   std::cout << "____ layers: " << numLayers << "\nnodes: " << numNodes << "\nnumConnections: " << numConnections << "\n";
 
   timeEnd("initialization");
@@ -57,12 +57,14 @@ int main()
   d->calc();
   timeEnd("calc");
 
-  auto m = d->getLast();
+  //auto m = d->getLast();
+  auto m = d->next->next;
   for (auto const& nod: m->nodes)
   {
     std::cout << nod->value << "   ";
   }
 
+  d->debugPrint();
 
   //delete d;
   return 0;

@@ -10,7 +10,7 @@ extern int numConnections;
 class Connection
 {
 public:
-  Connection() {
+  Connection(double w=0, double b=0) : weight(w), bias(b) {
     numConnections++;
   }
   double weight = 0;
