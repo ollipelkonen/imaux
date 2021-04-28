@@ -11,8 +11,6 @@
 extern int numLayers;
 extern int numNodes;
 extern int numConnections;
-
-
 extern void    AddLog(const char* fmt, ...) IM_FMTARGS(2);
 
 
@@ -73,7 +71,7 @@ public:
           v += this->nodes.at(j)->connections.at(i)->value;
         auto const & node = this->next->nodes.at(i);
         //node->value = v;
-        //TODO: here or in node?
+        //TODO: here or in node? z[l]=w[l]*a[l−1]+b[l] and a[l]=σ(z[l]).
         node->value = sigmoid(v);
       }
       next->calc();

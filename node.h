@@ -21,8 +21,7 @@ template <class T> class Layer;
 extern int numLayers;
 extern int numNodes;
 extern int numConnections;
-
-
+extern void    AddLog(const char* fmt, ...) IM_FMTARGS(2);
 
 
 
@@ -39,7 +38,6 @@ public:
     numNodes++;
   }
 
-  //void createConnections(Layer<T>& next);
   void createConnections(Layer<T>& next)
   {
     for (int i=0; i<next.size; i++)
@@ -56,22 +54,20 @@ public:
   }
 
   //T sigmoid(T z);
-  T sigmoid(T z)
+  T sigmoid(T z) const
   {
     return 1.0 / (1.0 + exp(-z));
     //return erf(sqrt(pi)*z/2); // much faster? uses <cmath>
     //return z / (1 + abs(z));  // fast, but not the same
   }
 
-  T calc()
+  void calc()
   {
-    //TODO: according to this, sigmoid is calculated AFTER adds http://neuralnetworksanddeeplearning.com/chap2.html
+    //TODO: check std::valarray, expression templates or https://github.com/blitzpp/blitz
     for (auto const& v: this->connections)
     {
-      //v->value += sigmoid(value * v->weight + v->bias);
       v->value += value * v->weight + v->bias;
     }
-    return 0;
   }
 };
 
