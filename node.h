@@ -71,6 +71,7 @@ public:
       //v->value += sigmoid(value * v->weight + v->bias);
       v->value += value * v->weight + v->bias;
     }
+    return v->value;
   }
 };
 
