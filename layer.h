@@ -13,6 +13,9 @@ extern int numNodes;
 extern int numConnections;
 
 
+extern void    AddLog(const char* fmt, ...) IM_FMTARGS(2);
+
+
 #ifndef Node
 template <class T> class Node;
 #endif
@@ -38,12 +41,14 @@ public:
     {
       this->nodes.push_back( std::make_shared<Node<T>>( *this ) );
     }
-    std::cout << "create node " << numLayers << "  size " << size << "   nodes: " << numNodes << "   connections " << numConnections << "\n";
+    //std::cout << "create node " << numLayers << "  size " << size << "   nodes: " << numNodes << "   connections " << numConnections << "\n";
+    AddLog( "create node %i   size %i   nodes: %i   connections: %i", numLayers, size, numNodes, numConnections );
   }
 
   void clear()
   {
-    std::cout << "  clear layer of size " << size << "\n";
+    //std::cout << "  clear layer of size " << size << "\n";
+    AddLog( "  clear layer of size %i", size );
     for( auto const &n: this->nodes )
       n->clear();
     if ( this->next != NULL )
@@ -54,7 +59,8 @@ public:
   {
     if ( previous == NULL )
       clear();
-    std::cout << "  calc layer of size " << size << " / " << nodes.size() << "\n";
+    //std::cout << "  calc layer of size " << size << " / " << nodes.size() << "\n";
+    AddLog("  calc layer of size %i", nodes.size());
     for( auto const &n: this->nodes )
       n->calc();
 
@@ -89,7 +95,8 @@ public:
 
   void debugPrint()
   {
-    std::cout << "value: " << nodes.at(0)->value << "\n";
+    //std::cout << "value: " << nodes.at(0)->value << "\n";
+    AddLog("value: %f", nodes.at(0)->value);
     if ( next != NULL )
       next->debugPrint();
   }
@@ -107,7 +114,8 @@ public:
   void test(int n = 0 )
   {
     auto node = nodes.at(0);
-    std::cout << "testing layer " << n << ": nodes " << nodes.size() << "   conns: " << (node->connections.size() * nodes.size()) << "\n";
+    //std::cout << "testing layer " << n << ": nodes " << nodes.size() << "   conns: " << (node->connections.size() * nodes.size()) << "\n";
+    AddLog( "testing layer %i:  nodes: %i  conns: %i", n, nodes.size(), (node->connections.size() * nodes.size()) );
     if ( this->next != NULL )
       this->next->test(n+1);
   }

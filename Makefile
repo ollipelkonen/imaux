@@ -23,8 +23,8 @@ OBJS = $(addsuffix .o, $(basename $(notdir $(SOURCES))))
 UNAME_S := $(shell uname -s)
 
 CXXFLAGS = -I$(IMGUI_DIR) -I$(IMGUI_DIR)/backends
-CXXFLAGS += -g -Wall -Wformat
-LIBS =
+CXXFLAGS += -g -Wall -Wformat -Wno-unused-function
+LIBS = -lpthread
 
 ##---------------------------------------------------------------------
 ## BUILD FLAGS PER PLATFORM
