@@ -4,21 +4,21 @@
 #include <chrono>
 #include <thread>
 
-
 #include "imgui.h"
 #include "imgui_impl_sdl.h"
 #include "imgui_impl_opengl2.h"
 #include <SDL.h>
 #include <SDL_opengl.h>
 
+#include "lib/picopng.h"
 
 
 int numLayers = 0;
 int numNodes = 0;
 int numConnections = 0;
+unsigned int texture;
 
 #include "layer.h"
-
 
 
 
@@ -31,7 +31,7 @@ unsigned int createTexture(unsigned char* data, int width, int height)
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
+  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
   return texture;
 }
 
@@ -126,10 +126,14 @@ void initImaux()
     size *= 2;
   }
   while ( size < 64 );
-  n = n->addChild( size*size );
+  //n = n->addChild( size*size );
   /*n = n->addChild( size*size );
   n = n->addChild( size*size );
   n = n->addChild( size*size );*/
+  n = n->addChild( 256*256 );
+
+  for (uint i=0; i<d->nodes.size(); i++)
+    d->nodes[i]->value = 0.5;
   AddLog( "____ layers: %i   nodes: %i   numConnections: ", numLayers, numNodes, numConnections);
 
   timeEnd("initialization");
@@ -153,13 +157,35 @@ void initImaux()
   d->debugPrint();
 
 
+  Layer<double>* last = d->getLast();
+  int w = (int)sqrt(last->size);
+  unsigned int* image = new unsigned int[w*w*4];
+
+  double max = -1;
+  for (int a=0; a<w*w; a++)
+  {
+    auto v = last->nodes[a]->value;
+    if ( v>max ) max = v;
+  }
+
+  for (int a=0; a<w*w; a++)
+  {
+    unsigned char v = last->nodes[a]->value / max;
+    v = -a;
+    //v = (unsigned char)a;
+    image[a] = (0xFF<<24) + (v<<16) + (v<<8) + v;
+  }
+  AddLog("create texture %ix%i max: %d ", w, w, max);
+  texture = createTexture((unsigned char*)image, w, w);
+  delete[] image;
 }
 
 void windows()
 {
-    if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER | SDL_INIT_GAMECONTROLLER) != 0)
+    //if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER | SDL_INIT_GAMECONTROLLER) != 0)
+    if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER) != 0)
     {
-        printf("Error: %s\n", SDL_GetError());
+        printf("__ Error: %s\n", SDL_GetError());
         return;
     }
 
@@ -195,10 +221,13 @@ void windows()
 
 
 int width = 256, height = 256;
-unsigned char* data = new unsigned char[width*height*3];
-for (int a=0;a<width*height*3; a++ )
-  data[a] = (unsigned char)a;
-unsigned int texture = createTexture( data, width, height );
+unsigned int* data = new unsigned int[width*height*4];
+for (int a=0;a<width*height; a++ )
+{
+  unsigned char v = (unsigned char)a;
+  data[a] = (0xFF<<24) + (v<<16) + (v<<8) + v;
+}
+texture = createTexture( (unsigned char*)data, width, height );
 delete[] data;
 
 std::thread first(initImaux);
@@ -230,25 +259,27 @@ std::thread first(initImaux);
 
             ImGui::Begin("imaux");
 
-            ImGui::Text("This is some useful text.");               // Display some text (you can use a format strings too)
-            //ImGui::Checkbox("Demo Window", &show_demo_window);      // Edit bools storing our window open/close state
 
             ImGui::SliderFloat("float", &f, 0.0f, 1.0f);            // Edit 1 float using a slider from 0.0f to 1.0f
             ImGui::ColorEdit3("clear color", (float*)&clear_color); // Edit 3 floats representing a color
 
-            if (ImGui::Button("Button"))                            // Buttons return true when clicked (most widgets return true when edited/activated)
-                counter++;
-            ImGui::SameLine();
-            ImGui::Text("counter = %d", counter);
+
+            ImVec2 size = {256,256};
+ImGui::Image( reinterpret_cast<ImTextureID*>(texture), size);
 
             DrawLog();
 
             static char buf[128] = "blablabla";
             ImGui::InputText("##Text", buf, IM_ARRAYSIZE(buf));
 
+            ImGui::Text("This is some useful text.");               // Display some text (you can use a format strings too)
+            //ImGui::Checkbox("Demo Window", &show_demo_window);      // Edit bools storing our window open/close state
 
-            ImVec2 size = {256,256};
-ImGui::Image( reinterpret_cast<ImTextureID*>(texture), size);
+            if (ImGui::Button("Button"))                            // Buttons return true when clicked (most widgets return true when edited/activated)
+                counter++;
+            ImGui::SameLine();
+            ImGui::Text("counter = %d", counter);
+
 
             ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
             ImGui::End();
@@ -294,6 +325,7 @@ from: http://neuralnetworksanddeeplearning.com/chap1.html#implementing_our_netwo
 
 net.SGD(training_data, 30, 10, 3.0, test_data=test_data)
 def SGD(self, training_data, epochs, mini_batch_size, eta, test_data=None):
+
 mini_batches = [
                 training_data[k:k+mini_batch_size]
                 for k in xrange(0, n, mini_batch_size)]
@@ -302,9 +334,8 @@ update_mini_batch(self, mini_batch, eta):
    for x, y in mini_batch:
             delta_nabla_b, delta_nabla_w = self.backprop(x, y)
 
-activation = x
- delta = self.cost_derivative(activations[-1], y) * \
-            sigmoid_prime(zs[-1])
+-> activation = x
+ delta = self.cost_derivative(activations[-1], y) * sigmoid_prime(zs[-1])
     nabla_b[-1] = delta
   nabla_w[-1] = np.dot(delta, activations[-2].transpose())
 
