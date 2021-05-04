@@ -130,7 +130,7 @@ void initImaux()
   /*n = n->addChild( size*size );
   n = n->addChild( size*size );
   n = n->addChild( size*size );*/
-  n = n->addChild( 256*256 );
+  n = n->addChild( 320*200 );
 
   for (uint i=0; i<d->nodes.size(); i++)
     d->nodes[i]->value = 0.5;
@@ -159,9 +159,9 @@ void initImaux()
 
   Layer<double>* last = d->getLast();
   int w = (int)sqrt(last->size);
-  unsigned int* image = new unsigned int[w*w*4];
+  unsigned int* image = new unsigned int[w*w];
 
-  double max = -1;
+  double max = -100;
   for (int a=0; a<w*w; a++)
   {
     auto v = last->nodes[a]->value;
@@ -220,8 +220,8 @@ void windows()
 
 
 
-int width = 256, height = 256;
-unsigned int* data = new unsigned int[width*height*4];
+int width = 320, height = 200;
+unsigned int* data = new unsigned int[width*height];
 for (int a=0;a<width*height; a++ )
 {
   unsigned char v = (unsigned char)a;
@@ -264,7 +264,7 @@ std::thread first(initImaux);
             ImGui::ColorEdit3("clear color", (float*)&clear_color); // Edit 3 floats representing a color
 
 
-            ImVec2 size = {256,256};
+            ImVec2 size = {320,200};
 ImGui::Image( reinterpret_cast<ImTextureID*>(texture), size);
 
             DrawLog();
