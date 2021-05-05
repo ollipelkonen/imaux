@@ -22,6 +22,26 @@ unsigned int texture;
 
 
 
+class Teacher
+{
+public:
+  Teacher( std::vector<double> target, std::vector<double> source ) : target(target), source(source) {
+  }
+  Teacher( unsigned int* tgt, std::vector<double> source, int length = 256000 ) : source(source) {
+    for ( int a=0; a<length; a+=4 )
+      target.push_back( ((double)tgt[a]) / 255.0 );
+  }
+  ~Teacher()
+  {
+    std::cout << "size of target: " << target.size() << "  source: " << source.size() << std::endl;
+  }
+  std::vector<double> target;
+  std::vector<double> source;
+};
+
+std::vector<Teacher> teachers;
+
+
 unsigned int createTexture(unsigned char* data, int width, int height)
 {
   unsigned int texture;
@@ -130,7 +150,7 @@ void initImaux()
   /*n = n->addChild( size*size );
   n = n->addChild( size*size );
   n = n->addChild( size*size );*/
-  n = n->addChild( 320*200 );
+  //n = n->addChild( 320*200 );
 
   for (uint i=0; i<d->nodes.size(); i++)
     d->nodes[i]->value = 0.5;
@@ -178,6 +198,10 @@ void initImaux()
   AddLog("create texture %ix%i max: %d ", w, w, max);
   texture = createTexture((unsigned char*)image, w, w);
   delete[] image;
+
+
+
+  AddLog("-fin-");
 }
 
 void windows()
@@ -227,8 +251,18 @@ for (int a=0;a<width*height; a++ )
   unsigned char v = (unsigned char)a;
   data[a] = (0xFF<<24) + (v<<16) + (v<<8) + v;
 }
-texture = createTexture( (unsigned char*)data, width, height );
-delete[] data;
+  std::vector<unsigned char> buffer, image;
+  loadFile(buffer, "vammasoturi.png");
+  unsigned long w, h;
+  int error = decodePNG(image, w, h, buffer.empty() ? 0 : &buffer[0], (unsigned long)buffer.size());
+copy(image.begin(),image.end(), (unsigned char*)data);
+texture = createTexture( (unsigned char*)data, 320, 200 );
+
+//teachers.push_back( *(new Teacher( v(data,data+width*height*4), {0.5f,0.5f})) );
+teachers.push_back( *(new Teacher( * new std::vector<double>(data,data+width*height*4), {0.5f,0.5f})) );
+
+//delete[] data;
+
 
 std::thread first(initImaux);
 
