@@ -18,9 +18,9 @@
 template <class T> class Layer;
 #endif
 
-extern int numLayers;
-extern int numNodes;
-extern int numConnections;
+extern volatile int numLayers;
+extern volatile int numNodes;
+extern volatile int numConnections;
 extern void    AddLog(const char* fmt, ...) IM_FMTARGS(2);
 
 

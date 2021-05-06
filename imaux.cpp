@@ -15,10 +15,10 @@
 using json = nlohmann::json;
 
 
-int numLayers = 0;
-int numNodes = 0;
-int numConnections = 0;
-unsigned int texture;
+volatile int numLayers = 0;
+volatile int numNodes = 0;
+volatile int numConnections = 0;
+volatile unsigned int texture;
 
 #include "layer.h"
 
@@ -55,15 +55,15 @@ std::vector<Teacher> teachers;
 
 unsigned int createTexture(unsigned char* data, int width, int height)
 {
-  unsigned int texture;
-  glGenTextures(1, &texture);
-  glBindTexture(GL_TEXTURE_2D, texture);
+  unsigned int texture_;
+  glGenTextures(1, &texture_);
+  glBindTexture(GL_TEXTURE_2D, texture_);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
   glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
-  return texture;
+  return texture_;
 }
 
 
@@ -161,11 +161,11 @@ void initImaux()
   /*n = n->addChild( size*size );
   n = n->addChild( size*size );
   n = n->addChild( size*size );*/
-  //n = n->addChild( 320*200 );
+  n = n->addChild( 320*200 );
 
   for (uint i=0; i<d->nodes.size(); i++)
     d->nodes[i]->value = 0.5;
-  AddLog( "____ layers: %i   nodes: %i   numConnections: ", numLayers, numNodes, numConnections);
+  AddLog( "____ layers: %i   nodes: %i   numConnections: %i", numLayers, numNodes, numConnections);
 
   timeEnd("initialization");
 
@@ -189,25 +189,27 @@ void initImaux()
 
 
   Layer<double>* last = d->getLast();
-  int w = (int)sqrt(last->size);
+  //int w = (int)sqrt(last->size);
+  int w = 320;
+  int h = 200;
   unsigned int* image = new unsigned int[w*w];
 
   double max = -100;
-  for (int a=0; a<w*w; a++)
+  for (int a=0; a<w*h; a++)
   {
     auto v = last->nodes[a]->value;
     if ( v>max ) max = v;
   }
 
-  for (int a=0; a<w*w; a++)
+  for (int a=0; a<w*h; a++)
   {
     unsigned char v = last->nodes[a]->value / max;
     v = -a;
     //v = (unsigned char)a;
     image[a] = (0xFF<<24) + (v<<16) + (v<<8) + v;
   }
-  AddLog("create texture %ix%i max: %d ", w, w, max);
-  texture = createTexture((unsigned char*)image, w, w);
+  AddLog("create texture %ix%i max: %d ", w, h, max);
+  texture = createTexture((unsigned char*)image, w, h);
   delete[] image;
 
 
@@ -216,6 +218,37 @@ void initImaux()
 
   AddLog("-fin-");
 }
+
+
+
+int loadTeachings()
+{
+  std::ifstream i("data/teachers.json");
+  json teachings;
+  i >> teachings;
+
+  for (auto& [key, value] : teachings.items()) {
+    auto filename = value.find("filename").value().get<std::string>();
+    std::cout << filename << std::endl;
+    std::vector<unsigned char> buffer, image;
+    loadFile(buffer, filename);
+    unsigned long w, h;
+    int error = decodePNG(image, w, h, buffer.empty() ? 0 : &buffer[0], (unsigned long)buffer.size());
+    if ( error != 0 )
+    {
+      std::cout << "error loading image " << filename << "     " << w << "x" << h << "  error: " << error << std::endl;
+      return 1;
+    }
+    unsigned int* data = new unsigned int[w*h];
+    copy(image.begin(),image.end(), (unsigned char*)data);
+    texture = createTexture( (unsigned char*)data, 320, 200 );
+    std::cout << "te " << texture << "  " << data[100*320+160] << std::endl;
+    auto values = value.find("values").value();
+    teachers.push_back( Teacher( data, values, w*h ) );
+  }
+  return 0;
+}
+
 
 void windows()
 {
@@ -262,6 +295,9 @@ void windows()
 
 
 std::thread first(initImaux);
+
+
+    loadTeachings();
 
     bool done = false;
     while (!done)
@@ -342,34 +378,6 @@ ImGui::Image( reinterpret_cast<ImTextureID*>(texture), size);
 
 int main()
 {
-
-
-
-  std::ifstream i("data/teachers.json");
-  json teachings;
-  i >> teachings;
-
-  for (auto& [key, value] : teachings.items()) {
-    auto filename = value.find("filename").value().get<std::string>();
-    std::cout << filename << std::endl;
-    std::vector<unsigned char> buffer, image;
-    loadFile(buffer, filename);
-    unsigned long w, h;
-    int error = decodePNG(image, w, h, buffer.empty() ? 0 : &buffer[0], (unsigned long)buffer.size());
-    if ( error != 0 )
-    {
-      std::cout << "error loading image " << filename << "     " << w << "x" << h << "  error: " << error << std::endl;
-      return 1;
-    }
-    unsigned int* data = new unsigned int[w*h];
-    copy(image.begin(),image.end(), (unsigned char*)data);
-    texture = createTexture( (unsigned char*)data, 320, 200 );
-    auto values = value.find("values").value();
-    teachers.push_back( Teacher( data, values, w*h ) );
-  }
-
-
-
 
 
   windows();

@@ -2,9 +2,9 @@
 #define CONNECTION_H_INCLUDED
 
 
-extern int numLayers;
-extern int numNodes;
-extern int numConnections;
+extern volatile int numLayers;
+extern volatile int numNodes;
+extern volatile int numConnections;
 
 
 class Connection

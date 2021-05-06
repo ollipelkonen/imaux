@@ -8,9 +8,9 @@
 
 #include "node.h"
 
-extern int numLayers;
-extern int numNodes;
-extern int numConnections;
+extern volatile int numLayers;
+extern volatile int numNodes;
+extern volatile int numConnections;
 extern void    AddLog(const char* fmt, ...) IM_FMTARGS(2);
 
 
@@ -40,7 +40,7 @@ public:
       this->nodes.push_back( std::make_shared<Node<T>>( *this ) );
     }
     //std::cout << "create node " << numLayers << "  size " << size << "   nodes: " << numNodes << "   connections " << numConnections << "\n";
-    AddLog( "create node %i   size %i   nodes: %i   connections: %i", numLayers, size, numNodes, numConnections );
+    AddLog( "create node %i   size %i (%i)   nodes: %i   connections: %i", numLayers, size, (int)sqrt(size), numNodes, numConnections );
   }
 
   void clear()
