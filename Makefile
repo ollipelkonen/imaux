@@ -19,12 +19,16 @@ IMGUI_DIR = lib/imgui
 SOURCES = imaux.cpp
 SOURCES += $(IMGUI_DIR)/imgui.cpp $(IMGUI_DIR)/imgui_demo.cpp $(IMGUI_DIR)/imgui_draw.cpp $(IMGUI_DIR)/imgui_tables.cpp $(IMGUI_DIR)/imgui_widgets.cpp
 SOURCES += $(IMGUI_DIR)/backends/imgui_impl_sdl.cpp $(IMGUI_DIR)/backends/imgui_impl_opengl2.cpp
+SOURCES += lib/rtmidi/RtMidi.cpp
 OBJS = $(addsuffix .o, $(basename $(notdir $(SOURCES))))
 UNAME_S := $(shell uname -s)
 
-CXXFLAGS = -I$(IMGUI_DIR) -I$(IMGUI_DIR)/backends
+
+CXXFLAGS = -I$(IMGUI_DIR) -I$(IMGUI_DIR)/backends -Ilib/rtmidi
 CXXFLAGS += -g -Wall -Wformat -Wno-unused-function -Wno-unused-but-set-variable -Wno-unused-variable -std=c++17
+CXXFLAGS += -DJACK_HAS_PORT_RENAME -DRTMIDI_EXPORT -D__LINUX_ALSA__ -D__UNIX_JACK__ -Drtmidi_EXPORTS
 LIBS = -lpthread
+LIBS +=  -ljack -lpthread /usr/lib/x86_64-linux-gnu/libasound.so -lpthread -lasound
 
 ##---------------------------------------------------------------------
 ## BUILD FLAGS PER PLATFORM
@@ -61,6 +65,9 @@ endif
 ##---------------------------------------------------------------------
 
 %.o:%.cpp
+	$(CXX) $(CXXFLAGS) -c -o $@ $<
+
+%.o:lib/rtmidi/%.cpp
 	$(CXX) $(CXXFLAGS) -c -o $@ $<
 
 %.o:$(IMGUI_DIR)/%.cpp

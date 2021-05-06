@@ -15,6 +15,10 @@
 using json = nlohmann::json;
 
 
+#include "lib/rtmidi/RtMidi.h"
+RtMidiIn *midiIn = NULL;
+
+
 volatile int numLayers = 0;
 volatile int numNodes = 0;
 volatile int numConnections = 0;
@@ -161,7 +165,7 @@ void initImaux()
   /*n = n->addChild( size*size );
   n = n->addChild( size*size );
   n = n->addChild( size*size );*/
-  n = n->addChild( 320*200 );
+//  n = n->addChild( 320*200 );
 
   for (uint i=0; i<d->nodes.size(); i++)
     d->nodes[i]->value = 0.5;
@@ -192,7 +196,11 @@ void initImaux()
   //int w = (int)sqrt(last->size);
   int w = 320;
   int h = 200;
-  unsigned int* image = new unsigned int[w*w];
+  if ( last->size < 64000 )
+  {
+    w = h = (int)sqrt(last->size);
+  }
+  unsigned int* image = new unsigned int[w*h];
 
   double max = -100;
   for (int a=0; a<w*h; a++)
@@ -250,6 +258,26 @@ int loadTeachings()
 }
 
 
+void midiCallback( double deltatime, std::vector< unsigned char > *message, void *userData )
+{
+  unsigned int nBytes = message->size();
+  for ( unsigned int i=0; i<nBytes; i++ )
+    std::cout << "Byte " << i << " = " << (int)message->at(i) << ", ";
+  if ( nBytes > 0 )
+    std::cout << "stamp = " << deltatime << std::endl;
+
+  auto command = (int)message->at(0);
+  auto key = (int)message->at(1);
+  auto value = (int)message->at(2);
+  if ( command == 176 || command == 224 )
+  {
+    if ( key >= 70 && key <= 73 )
+      ((int*)userData)[0] = value;
+    if ( key >= 74 && key <= 77 )
+      ((int*)userData)[1] = value;
+  }
+}
+
 void windows()
 {
     //if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER | SDL_INIT_GAMECONTROLLER) != 0)
@@ -292,6 +320,27 @@ void windows()
     std::thread first(initImaux);
     loadTeachings();
 
+    static int midiPort = 0;
+    std::vector<const char*> midiPorts;
+    midiPorts.push_back("--");
+    midiIn = new RtMidiIn();
+    int midiInputKeys[2] = {64,64};
+    midiIn->setCallback( &midiCallback, &midiInputKeys );
+    if ( midiIn != NULL )
+    {
+      unsigned int nPorts = midiIn->getPortCount();
+      for ( unsigned int i=0; i<nPorts; i++ )
+      {
+        //const char* kkk = midiIn->getPortName(i).c_str();
+        auto name = midiIn->getPortName(i);
+        char* buffer = new char[name.length()+1] ;
+        name.copy(buffer,name.length());
+        buffer[name.length()]='\0';
+        midiPorts.push_back( buffer );
+      }
+    }
+
+std::cout << midiPorts.size() << " " << *midiPorts.data() << "  " << &midiPorts[0] << " " << midiPorts[1] << std::endl;
 
     bool done = false;
     while (!done)
@@ -321,9 +370,18 @@ void windows()
             ImGui::Begin("imaux");
 
 
-            ImGui::SliderFloat("float", &f, 0.0f, 1.0f);            // Edit 1 float using a slider from 0.0f to 1.0f
-            ImGui::ColorEdit3("clear color", (float*)&clear_color); // Edit 3 floats representing a color
+            //ImGui::SliderFloat("x", &f, 0.0f, 1.0f);
+            ImGui::SliderInt("x", &(midiInputKeys[0]), 0, 127);            // Edit 1 float using a slider from 0.0f to 1.0f
+            ImGui::SliderInt("y", &(midiInputKeys[1]), 0, 127);            // Edit 1 float using a slider from 0.0f to 1.0f
+            //ImGui::ColorEdit3("clear color", (float*)&clear_color); // Edit 3 floats representing a color
 
+            if ( ImGui::Combo("combo", &midiPort, &midiPorts[0], midiPorts.size()) )
+            {
+              midiIn->closePort();
+              if ( midiPort > 0 )
+                midiIn->openPort( midiPort-1 );
+              //std::cout << "CHANGE " << midiPort << std::endl;
+            }
 
             ImVec2 size = {320,200};
             ImGui::Image( reinterpret_cast<ImTextureID*>(texture), size);
@@ -354,6 +412,7 @@ void windows()
         ImGui_ImplOpenGL2_RenderDrawData(ImGui::GetDrawData());
         SDL_GL_SwapWindow(window);
     }
+    delete midiIn;
 
     ImGui_ImplOpenGL2_Shutdown();
     ImGui_ImplSDL2_Shutdown();
@@ -364,7 +423,6 @@ void windows()
 
     first.join();
     SDL_Quit();
-
 }
 
 
