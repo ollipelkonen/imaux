@@ -266,15 +266,18 @@ void midiCallback( double deltatime, std::vector< unsigned char > *message, void
   if ( nBytes > 0 )
     std::cout << "stamp = " << deltatime << std::endl;
 
-  auto command = (int)message->at(0);
-  auto key = (int)message->at(1);
-  auto value = (int)message->at(2);
-  if ( command == 176 || command == 224 )
+  if ( nBytes == 3 )
   {
-    if ( key >= 70 && key <= 73 )
-      ((int*)userData)[0] = value;
-    if ( key >= 74 && key <= 77 )
-      ((int*)userData)[1] = value;
+    auto command = (int)message->at(0);
+    auto key = (int)message->at(1);
+    auto value = (int)message->at(2);
+    if ( command == 176 || command == 224 )
+    {
+      if ( (key >= 70 && key <= 73) || (key == 1) )
+        ((int*)userData)[0] = value;
+      else if ( (key >= 74 && key <= 77) || (command == 224) )
+        ((int*)userData)[1] = value;
+    }
   }
 }
 
@@ -377,7 +380,8 @@ std::cout << midiPorts.size() << " " << *midiPorts.data() << "  " << &midiPorts[
 
             if ( ImGui::Combo("combo", &midiPort, &midiPorts[0], midiPorts.size()) )
             {
-              midiIn->closePort();
+              if ( midiIn->isPortOpen() )
+                midiIn->closePort();
               if ( midiPort > 0 )
                 midiIn->openPort( midiPort-1 );
               //std::cout << "CHANGE " << midiPort << std::endl;
