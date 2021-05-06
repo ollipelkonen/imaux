@@ -11,6 +11,8 @@
 #include <SDL_opengl.h>
 
 #include "lib/picopng.h"
+#include "lib/nlohmann/json.hpp"
+using json = nlohmann::json;
 
 
 int numLayers = 0;
@@ -21,25 +23,34 @@ unsigned int texture;
 #include "layer.h"
 
 
+/*
+// write prettified JSON to another file
+std::ofstream o("pretty.json");
+o << std::setw(4) << j << std::endl;
+*/
+
+
 
 class Teacher
 {
 public:
-  Teacher( std::vector<double> target, std::vector<double> source ) : target(target), source(source) {
+  Teacher( unsigned int* tgt, std::vector<double> source, int length = 64000 ) : source(source) {
+    for ( int a=0; a<length; a++ )
+    {
+      target.push_back( ((double)(tgt[a]&0xFF)) / 255.0 );
+    }
   }
-  Teacher( unsigned int* tgt, std::vector<double> source, int length = 256000 ) : source(source) {
-    for ( int a=0; a<length; a+=4 )
-      target.push_back( ((double)tgt[a]) / 255.0 );
-  }
+
   ~Teacher()
   {
-    std::cout << "size of target: " << target.size() << "  source: " << source.size() << std::endl;
+    std::cout << " why deleting teacher of target: " << target.size() << "  source: " << source.size() << "  " << source[0] << ", " << source[1] << std::endl;
   }
   std::vector<double> target;
   std::vector<double> source;
 };
 
 std::vector<Teacher> teachers;
+
 
 
 unsigned int createTexture(unsigned char* data, int width, int height)
@@ -200,6 +211,8 @@ void initImaux()
   delete[] image;
 
 
+  AddLog(" teachers: %i ", teachers.size() );
+
 
   AddLog("-fin-");
 }
@@ -244,22 +257,6 @@ void windows()
 
 
 
-int width = 320, height = 200;
-unsigned int* data = new unsigned int[width*height];
-for (int a=0;a<width*height; a++ )
-{
-  unsigned char v = (unsigned char)a;
-  data[a] = (0xFF<<24) + (v<<16) + (v<<8) + v;
-}
-  std::vector<unsigned char> buffer, image;
-  loadFile(buffer, "vammasoturi.png");
-  unsigned long w, h;
-  int error = decodePNG(image, w, h, buffer.empty() ? 0 : &buffer[0], (unsigned long)buffer.size());
-copy(image.begin(),image.end(), (unsigned char*)data);
-texture = createTexture( (unsigned char*)data, 320, 200 );
-
-//teachers.push_back( *(new Teacher( v(data,data+width*height*4), {0.5f,0.5f})) );
-teachers.push_back( *(new Teacher( * new std::vector<double>(data,data+width*height*4), {0.5f,0.5f})) );
 
 //delete[] data;
 
@@ -342,8 +339,38 @@ ImGui::Image( reinterpret_cast<ImTextureID*>(texture), size);
 
 
 
+
 int main()
 {
+
+
+
+  std::ifstream i("data/teachers.json");
+  json teachings;
+  i >> teachings;
+
+  for (auto& [key, value] : teachings.items()) {
+    auto filename = value.find("filename").value().get<std::string>();
+    std::cout << filename << std::endl;
+    std::vector<unsigned char> buffer, image;
+    loadFile(buffer, filename);
+    unsigned long w, h;
+    int error = decodePNG(image, w, h, buffer.empty() ? 0 : &buffer[0], (unsigned long)buffer.size());
+    if ( error != 0 )
+    {
+      std::cout << "error loading image " << filename << "     " << w << "x" << h << "  error: " << error << std::endl;
+      return 1;
+    }
+    unsigned int* data = new unsigned int[w*h];
+    copy(image.begin(),image.end(), (unsigned char*)data);
+    texture = createTexture( (unsigned char*)data, 320, 200 );
+    auto values = value.find("values").value();
+    teachers.push_back( Teacher( data, values, w*h ) );
+  }
+
+
+
+
 
   windows();
 

@@ -23,7 +23,7 @@ OBJS = $(addsuffix .o, $(basename $(notdir $(SOURCES))))
 UNAME_S := $(shell uname -s)
 
 CXXFLAGS = -I$(IMGUI_DIR) -I$(IMGUI_DIR)/backends
-CXXFLAGS += -g -Wall -Wformat -Wno-unused-function -Wno-unused-but-set-variable
+CXXFLAGS += -g -Wall -Wformat -Wno-unused-function -Wno-unused-but-set-variable -std=c++17
 LIBS = -lpthread
 
 ##---------------------------------------------------------------------

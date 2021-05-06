@@ -1,0 +1,46 @@
+[
+  {
+    "filename": "data/vammasoturi.png",
+    "values": [0,0]
+  },
+  {
+    "filename": "data/iso_demokratia.png",
+    "values": [0.5,0]
+  },
+  {
+    "filename": "data/iso_dune.png",
+    "values": [0,0.5]
+  },
+  {
+    "filename": "data/iso_evo.png",
+    "values": [1,0]
+  },
+  {
+    "filename": "data/iso_glue.png",
+    "values": [0,1]
+  },
+  {
+    "filename": "data/iso_hattara.png",
+    "values": [0.25,0.25]
+  },
+  {
+    "filename": "data/iso_japanialainen.png",
+    "values": [0.5,0.5]
+  },
+  {
+    "filename": "data/iso_kannykka.png",
+    "values": [0.75,0.75]
+  },
+  {
+    "filename": "data/iso_lepakko.png",
+    "values": [1,1]
+  },
+  {
+    "filename": "data/iso_peruna.png",
+    "values": [0.33,0.66]
+  },
+  {
+    "filename": "data/iso_possuja.png",
+    "values": [0.33,0.66]
+  }
+]
