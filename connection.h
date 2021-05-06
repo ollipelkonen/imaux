@@ -16,6 +16,8 @@ public:
   double weight = 0;
   double bias = 0;
   double value = 0;
+
+  double error = 0;
 };
 
 #endif

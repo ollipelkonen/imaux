@@ -289,15 +289,9 @@ void windows()
     ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
 
 
-
-
-//delete[] data;
-
-
-std::thread first(initImaux);
-
-
+    std::thread first(initImaux);
     loadTeachings();
+
 
     bool done = false;
     while (!done)
@@ -332,7 +326,7 @@ std::thread first(initImaux);
 
 
             ImVec2 size = {320,200};
-ImGui::Image( reinterpret_cast<ImTextureID*>(texture), size);
+            ImGui::Image( reinterpret_cast<ImTextureID*>(texture), size);
 
             DrawLog();
 

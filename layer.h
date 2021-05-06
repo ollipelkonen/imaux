@@ -45,8 +45,7 @@ public:
 
   void clear()
   {
-    //std::cout << "  clear layer of size " << size << "\n";
-    AddLog( "  clear layer of size %i", size );
+    //AddLog( "  clear layer of size %i", size );
     for( auto const &n: this->nodes )
       n->clear();
     if ( this->next != NULL )
@@ -75,6 +74,18 @@ public:
         node->value = sigmoid(v);
       }
       next->calc();
+    }
+  }
+
+  void calcError()
+  {
+    if ( this->next != NULL )
+    {
+      for (auto &n : nodes )
+      {
+        n.calcError();
+      }
+      this->next->calcError();
     }
   }
 

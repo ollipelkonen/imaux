@@ -69,6 +69,15 @@ public:
       v->value += value * v->weight + v->bias;
     }
   }
+
+  void calcError()
+  {
+    for (auto const& v: this->connections)
+    {
+      v->value += value * v->weight + v->bias;
+    }
+  }
+
 };
 
 
