@@ -70,8 +70,18 @@ public:
     }
   }
 
+  void calcError(std::vector<double>& target)
+  {
+    //TODO:
+      for (auto const& v: this->connections)
+    {
+      v->value += value * v->weight + v->bias;
+    }
+  }
+
   void calcError()
   {
+    //TODO:
     for (auto const& v: this->connections)
     {
       v->value += value * v->weight + v->bias;

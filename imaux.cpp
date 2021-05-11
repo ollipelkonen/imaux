@@ -165,7 +165,7 @@ void initImaux()
   /*n = n->addChild( size*size );
   n = n->addChild( size*size );
   n = n->addChild( size*size );*/
-//  n = n->addChild( 320*200 );
+  n = n->addChild( 320*200 );
 
   for (uint i=0; i<d->nodes.size(); i++)
     d->nodes[i]->value = 0.5;
@@ -219,6 +219,11 @@ void initImaux()
   AddLog("create texture %ix%i max: %d ", w, h, max);
   texture = createTexture((unsigned char*)image, w, h);
   delete[] image;
+
+
+  timeStart();
+  d->calcError( teachers[0].target );
+  timeEnd("calcError");
 
 
   AddLog(" teachers: %i ", teachers.size() );
@@ -383,7 +388,10 @@ std::cout << midiPorts.size() << " " << *midiPorts.data() << "  " << &midiPorts[
               if ( midiIn->isPortOpen() )
                 midiIn->closePort();
               if ( midiPort > 0 )
+              {
                 midiIn->openPort( midiPort-1 );
+                RtMidi::Api midiApi = midiIn->getCurrentApi();
+              }
               //std::cout << "CHANGE " << midiPort << std::endl;
             }
 

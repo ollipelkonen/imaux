@@ -11,7 +11,7 @@
 #   pacman -S mingw-w64-i686-SDL2
 #
 
-#CXX = g++
+CXX = g++
 #CXX = clang++
 
 EXE = imaux
@@ -27,6 +27,8 @@ UNAME_S := $(shell uname -s)
 CXXFLAGS = -I$(IMGUI_DIR) -I$(IMGUI_DIR)/backends -Ilib/rtmidi
 CXXFLAGS += -g -Wall -Wformat -Wno-unused-function -Wno-unused-but-set-variable -Wno-unused-variable -std=c++17
 CXXFLAGS += -DJACK_HAS_PORT_RENAME -DRTMIDI_EXPORT -D__LINUX_ALSA__ -D__UNIX_JACK__ -Drtmidi_EXPORTS
+#CXXFLAGS += -O3
+CXXFLAGS += -Ofast
 LIBS = -lpthread
 LIBS +=  -ljack -lpthread /usr/lib/x86_64-linux-gnu/libasound.so -lpthread -lasound
 

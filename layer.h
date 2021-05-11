@@ -77,15 +77,23 @@ public:
     }
   }
 
-  void calcError()
+  void calcError(std::vector<double>& target)
   {
-    if ( this->next != NULL )
+    if ( this->next == NULL )
     {
+      //passing target to last node, then going through all the others
       for (auto &n : nodes )
       {
-        n.calcError();
+        n->calcError(target);
       }
-      this->next->calcError();
+    }
+    else
+    {
+      this->next->calcError(target);
+      for (auto &n : nodes )
+      {
+        n->calcError();
+      }
     }
   }
 
