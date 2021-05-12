@@ -32,7 +32,7 @@ template <class T> class Node
 public:
   T value;
   //std::vector<std::unique_ptr<Connection>> connections;
-  Connection* connections;
+  Connection* connections = NULL;
   int connections_size;
   Layer<T>& parent;
 
@@ -41,7 +41,9 @@ public:
   }
 
   ~Node() {
-    delete[] connections;
+    std::cout << "delete from " << connections_size << "  where " << connections << std::endl;
+    if ( connections != NULL )
+      delete[] connections;
   }
 
   void createConnections(Layer<T>& next)
