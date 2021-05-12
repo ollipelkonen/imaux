@@ -230,6 +230,20 @@ void initImaux()
 
 
   AddLog("-fin-");
+
+
+
+  std::ofstream o("pretty.json");
+  std::vector<int> v = {1, 2, 5, 8};
+  json j;
+  j["val"] = v;
+  int v2[4] = {1,2,3,4};
+  j["val2"] = v2;
+  json j3(v);
+  j["val3"] = j3;
+  o << j.dump(4) << std::endl;
+  o.close();
+
 }
 
 
