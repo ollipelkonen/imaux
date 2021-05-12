@@ -31,26 +31,30 @@ template <class T> class Node
 {
 public:
   T value;
-  std::vector<std::unique_ptr<Connection>> connections;
+  //std::vector<std::unique_ptr<Connection>> connections;
+  Connection* connections;
+  int connections_size;
   Layer<T>& parent;
 
   Node( Layer<T>& parent ) : parent(parent) {
     numNodes++;
   }
 
+  ~Node() {
+    delete[] connections;
+  }
+
   void createConnections(Layer<T>& next)
   {
-    for (int i=0; i<next.size; i++)
-    {
-      this->connections.push_back( std::make_unique<Connection>() );
-    }
+    this->connections = new Connection[next.size];
+    connections_size = next.size;
   }
 
   void clear()
   {
     //std::cout << "  clear node of size " << connections.size() << "\n";
-    for (auto const &c: this->connections)
-      c->value = 0;
+    for ( int a=0; a<connections_size; a++ )
+        connections[a].value = 0;
   }
 
   //T sigmoid(T z);
@@ -64,28 +68,22 @@ public:
   void calc()
   {
     //TODO: check std::valarray, expression templates or https://github.com/blitzpp/blitz
-    for (auto const& v: this->connections)
-    {
-      v->value += value * v->weight + v->bias;
-    }
+    for ( int a=0; a<connections_size; a++ )
+      connections[a].value += value * connections[a].weight + connections[a].bias;
   }
 
   void calcError(std::vector<double>& target)
   {
     //TODO:
-      for (auto const& v: this->connections)
-    {
-      v->value += value * v->weight + v->bias;
-    }
+    for ( int a=0; a<connections_size; a++ )
+      connections[a].value += value * connections[a].weight + connections[a].bias;
   }
 
   void calcError()
   {
     //TODO:
-    for (auto const& v: this->connections)
-    {
-      v->value += value * v->weight + v->bias;
-    }
+    for ( int a=0; a<connections_size; a++ )
+      connections[a].value += value * connections[a].weight + connections[a].bias;
   }
 
 };

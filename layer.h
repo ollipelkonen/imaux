@@ -67,7 +67,7 @@ public:
       {
         T v = 0;
         for( int j=0; j<this->size; j ++ )
-          v += this->nodes.at(j)->connections.at(i)->value;
+          v += this->nodes.at(j)->connections[i].value;
         auto const & node = this->next->nodes.at(i);
         //node->value = v;
         //TODO: here or in node? z[l]=w[l]*a[l−1]+b[l] and a[l]=σ(z[l]).
@@ -132,7 +132,7 @@ public:
   {
     auto node = nodes.at(0);
     //std::cout << "testing layer " << n << ": nodes " << nodes.size() << "   conns: " << (node->connections.size() * nodes.size()) << "\n";
-    AddLog( "testing layer %i:  nodes: %i  conns: %i", n, nodes.size(), (node->connections.size() * nodes.size()) );
+    AddLog( "testing layer %i:  nodes: %i  conns: %i", n, nodes.size(), (node->connections_size * nodes.size()) );
     if ( this->next != NULL )
       this->next->test(n+1);
   }
