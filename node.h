@@ -77,15 +77,19 @@ public:
   void calcError(std::vector<double>& target)
   {
     //TODO:
+    T error = 0;
     for ( int a=0; a<connections_size; a++ )
-      connections[a].value += value * connections[a].weight + connections[a].bias;
+      error += value * connections[a].weight + connections[a].bias;
+    error = this.sigmoid(error);
   }
 
   void calcError()
   {
     //TODO:
+    T error = 0;
     for ( int a=0; a<connections_size; a++ )
-      connections[a].value += value * connections[a].weight + connections[a].bias;
+      error += value * connections[a].weight + connections[a].bias;
+    error = this.sigmoid(error);
   }
 
 };
