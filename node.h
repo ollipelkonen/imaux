@@ -80,7 +80,7 @@ public:
     T error = 0;
     for ( int a=0; a<connections_size; a++ )
       error += value * connections[a].weight + connections[a].bias;
-    error = this.sigmoid(error);
+    error = this->sigmoid(error);
   }
 
   void calcError()
@@ -89,7 +89,7 @@ public:
     T error = 0;
     for ( int a=0; a<connections_size; a++ )
       error += value * connections[a].weight + connections[a].bias;
-    error = this.sigmoid(error);
+    error = this->sigmoid(error);
   }
 
 };
